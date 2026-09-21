@@ -4,8 +4,7 @@ const VIDEO_SRC = '/macaw.mp4'
 const SEEK_EPSILON = 0.02
 
 /**
- * Full-viewport video; object-fit contain so the whole macaw is visible.
- * Sky shows in letterbox/pillarbox. Mouse X → playhead (look toward cursor).
+ * Full-viewport contain video, nudged right and slightly faded so hero copy stays readable.
  */
 export default function BackgroundVideo() {
   const videoRef = useRef<HTMLVideoElement>(null)
@@ -65,7 +64,9 @@ export default function BackgroundVideo() {
       className="pointer-events-none fixed inset-0 z-0 h-full w-full"
       style={{
         objectFit: 'contain',
-        objectPosition: 'center center',
+        objectPosition: '78% center',
+        transform: 'translateX(8%)',
+        opacity: 0.72,
         background: 'var(--macaw-sky)',
       }}
     />

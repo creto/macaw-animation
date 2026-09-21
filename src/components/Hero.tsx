@@ -52,6 +52,16 @@ export default function Hero() {
       className="relative h-screen flex flex-col justify-end pb-12 md:justify-center md:pb-0 px-5 sm:px-8 md:px-10 overflow-hidden"
       style={{ zIndex: 1 }}
     >
+      <div
+        aria-hidden
+        className="hero-scrim pointer-events-none absolute inset-y-0 left-0"
+        style={{
+          width: 'min(55%, 36rem)',
+          background:
+            'linear-gradient(90deg, color-mix(in srgb, var(--macaw-sky) 88%, transparent) 0%, color-mix(in srgb, var(--macaw-sky) 55%, transparent) 55%, transparent 100%)',
+          zIndex: 0,
+        }}
+      />
       <div className="max-w-xl relative z-10">
         <p
           className="pointer-events-none select-none mb-5 sm:mb-6"
@@ -61,6 +71,7 @@ export default function Hero() {
             fontWeight: 400,
             color: '#000',
             filter: 'blur(4px)',
+            textShadow: '0 1px 0 color-mix(in srgb, var(--macaw-sky) 70%, transparent)',
           }}
         >
           Hey there, meet A.R.I.A,
@@ -75,6 +86,7 @@ export default function Hero() {
             lineHeight: 1.35,
             fontWeight: 400,
             minHeight: '54px',
+            textShadow: '0 1px 14px color-mix(in srgb, var(--macaw-sky) 90%, transparent)',
           }}
         >
           {displayed}
