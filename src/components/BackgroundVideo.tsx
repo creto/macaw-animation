@@ -64,9 +64,8 @@ export default function BackgroundVideo() {
       className="pointer-events-none fixed inset-0 z-0 h-full w-full"
       style={{
         objectFit: 'contain',
-        objectPosition: '78% center',
-        transform: 'translateX(8%)',
-        opacity: 0.72,
+        objectPosition: '88% center',
+        transform: 'translateX(14%)',
         background: 'var(--macaw-sky)',
       }}
     />
