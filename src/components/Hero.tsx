@@ -49,7 +49,7 @@ export default function Hero() {
 
   return (
     <section
-      className="relative h-screen flex flex-col justify-end pb-12 md:justify-center md:pb-0 px-5 sm:px-8 md:px-10 overflow-hidden pr-[min(46vw,28rem)]"
+      className="relative h-screen flex flex-col justify-end pb-12 md:justify-center md:pb-0 px-5 sm:px-8 md:px-10 overflow-hidden pr-[min(52vw,34rem)] md:pr-[min(48vw,36rem)]"
       style={{ zIndex: 1 }}
     >
       <div className="max-w-xl relative z-10">

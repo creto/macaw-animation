@@ -1,21 +1,18 @@
 import { useCallback, useEffect, useRef } from 'react'
 
 const VIDEO_SRC = '/macaw.mp4'
-
-/** How much of the clip a full-width mouse sweep scrubs through. */
-const SENSITIVITY = 0.8
-/** Seeks closer than this are not worth a round trip. */
-const SEEK_EPSILON = 0.01
+const SEEK_EPSILON = 0.02
 
 /**
- * Compact macaw scrubber on the right. Page sky fills the rest.
- * Scrub direction matches mouse: move left → earlier frames (head follows left).
+ * Medium macaw on the right over the sky fill.
+ * Absolute scrub: mouse X maps to playhead so the bird looks toward the cursor
+ * (clip starts facing right / ends facing left → invert X).
  */
 export default function BackgroundVideo() {
   const videoRef = useRef<HTMLVideoElement>(null)
   const targetTimeRef = useRef(0)
   const isSeekingRef = useRef(false)
-  const prevXRef = useRef<number | null>(null)
+  const rafRef = useRef(0)
 
   const seek = useCallback(() => {
     const video = videoRef.current
@@ -36,45 +33,36 @@ export default function BackgroundVideo() {
       if (!video) return
 
       const { duration } = video
-      if (!Number.isFinite(duration) || duration <= 0) {
-        prevXRef.current = event.clientX
-        return
-      }
+      if (!Number.isFinite(duration) || duration <= 0) return
 
-      if (prevXRef.current === null) {
-        prevXRef.current = event.clientX
-        return
-      }
+      // 0 at left edge → 1 at right. Clip faces right at t=0 and left at t=end.
+      const x = Math.min(Math.max(event.clientX / window.innerWidth, 0), 1)
+      targetTimeRef.current = (1 - x) * duration
 
-      const delta = event.clientX - prevXRef.current
-      prevXRef.current = event.clientX
-
-      // Negate so left mouse motion scrubs toward the left-facing pose.
-      const offset = (-delta / window.innerWidth) * SENSITIVITY * duration
-      targetTimeRef.current = Math.min(
-        Math.max(targetTimeRef.current + offset, 0),
-        duration,
-      )
-
-      seek()
+      cancelAnimationFrame(rafRef.current)
+      rafRef.current = requestAnimationFrame(seek)
     }
 
-    window.addEventListener('mousemove', handleMouseMove)
-    return () => window.removeEventListener('mousemove', handleMouseMove)
+    window.addEventListener('mousemove', handleMouseMove, { passive: true })
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove)
+      cancelAnimationFrame(rafRef.current)
+    }
   }, [seek])
 
   return (
     <div
       aria-hidden
-      className="pointer-events-none fixed z-0 overflow-hidden rounded-2xl shadow-sm"
+      className="pointer-events-none fixed z-0 overflow-hidden"
       style={{
-        // Keep clear of left copy (max-w-xl + padding) and edges
-        right: 'clamp(1rem, 4vw, 3rem)',
-        top: '50%',
-        transform: 'translateY(-50%)',
-        width: 'min(38vw, 420px)',
+        right: 'clamp(0.75rem, 3vw, 2.5rem)',
+        bottom: 'clamp(1rem, 4vh, 3rem)',
+        top: 'auto',
+        // Medium: bigger than before, not full-bleed
+        width: 'min(58vw, 640px)',
+        maxHeight: 'min(72vh, 560px)',
         aspectRatio: '16 / 9',
-        background: 'var(--macaw-sky)',
+        background: 'transparent',
       }}
     >
       <video
@@ -84,10 +72,17 @@ export default function BackgroundVideo() {
         playsInline
         preload="auto"
         onSeeked={handleSeeked}
+        onLoadedMetadata={() => {
+          const video = videoRef.current
+          if (!video || !Number.isFinite(video.duration)) return
+          // Start mid-turn / facing somewhat toward center
+          targetTimeRef.current = video.duration * 0.5
+          video.currentTime = targetTimeRef.current
+        }}
         className="h-full w-full"
         style={{
           objectFit: 'contain',
-          objectPosition: 'center center',
+          objectPosition: 'center bottom',
         }}
       />
     </div>
