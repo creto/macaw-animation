@@ -4,8 +4,8 @@ const VIDEO_SRC = '/macaw.mp4'
 const SEEK_EPSILON = 0.02
 
 /**
- * Right-side macaw: taller than pure contain, a bit smaller than full half-page cover.
- * ~90vh cover scaled to ~0.92 so the bird reads big/tall without the old full crop.
+ * Full-viewport video; object-fit contain so the whole macaw is visible.
+ * Sky shows in letterbox/pillarbox. Mouse X → playhead (look toward cursor).
  */
 export default function BackgroundVideo() {
   const videoRef = useRef<HTMLVideoElement>(null)
@@ -49,38 +49,25 @@ export default function BackgroundVideo() {
   }, [seek])
 
   return (
-    <div
-      aria-hidden
-      className="pointer-events-none fixed inset-y-0 right-0 z-0 flex items-center justify-end overflow-hidden"
+    <video
+      ref={videoRef}
+      src={VIDEO_SRC}
+      muted
+      playsInline
+      preload="auto"
+      onSeeked={handleSeeked}
+      onLoadedMetadata={() => {
+        const video = videoRef.current
+        if (!video || !Number.isFinite(video.duration)) return
+        targetTimeRef.current = video.duration * 0.5
+        video.currentTime = targetTimeRef.current
+      }}
+      className="pointer-events-none fixed inset-0 z-0 h-full w-full"
       style={{
-        left: '42%',
-        width: '58%',
+        objectFit: 'contain',
+        objectPosition: 'center center',
         background: 'var(--macaw-sky)',
       }}
-    >
-      <video
-        ref={videoRef}
-        src={VIDEO_SRC}
-        muted
-        playsInline
-        preload="auto"
-        onSeeked={handleSeeked}
-        onLoadedMetadata={() => {
-          const video = videoRef.current
-          if (!video || !Number.isFinite(video.duration)) return
-          targetTimeRef.current = video.duration * 0.5
-          video.currentTime = targetTimeRef.current
-        }}
-        style={{
-          // Mid size: almost half-page cover height, not tiny contain
-          height: '92vh',
-          width: '100%',
-          objectFit: 'cover',
-          objectPosition: '62% center',
-          transform: 'scale(0.92) translateX(3%)',
-          transformOrigin: 'center right',
-        }}
-      />
-    </div>
+    />
   )
 }
