@@ -4,9 +4,8 @@ const VIDEO_SRC = '/macaw.mp4'
 const SEEK_EPSILON = 0.02
 
 /**
- * Full-height macaw from ~38% width to the right edge (a bit more than half).
- * object-fit: contain so the bird is never cropped; nudged slightly right.
- * Absolute scrub: mouse X → playhead (clip faces right at t=0, left at end).
+ * Right-side macaw: taller than pure contain, a bit smaller than full half-page cover.
+ * ~90vh cover scaled to ~0.92 so the bird reads big/tall without the old full crop.
  */
 export default function BackgroundVideo() {
   const videoRef = useRef<HTMLVideoElement>(null)
@@ -52,11 +51,10 @@ export default function BackgroundVideo() {
   return (
     <div
       aria-hidden
-      className="pointer-events-none fixed inset-y-0 right-0 z-0 overflow-hidden"
+      className="pointer-events-none fixed inset-y-0 right-0 z-0 flex items-center justify-end overflow-hidden"
       style={{
-        // A bit more than half: from 38% → right edge (~62% of viewport)
-        left: '38%',
-        width: '62%',
+        left: '42%',
+        width: '58%',
         background: 'var(--macaw-sky)',
       }}
     >
@@ -73,12 +71,14 @@ export default function BackgroundVideo() {
           targetTimeRef.current = video.duration * 0.5
           video.currentTime = targetTimeRef.current
         }}
-        className="h-full w-full"
         style={{
-          // Full bird visible (no crop); slight bias to the right
-          objectFit: 'contain',
-          objectPosition: '70% center',
-          transform: 'translateX(4%)',
+          // Mid size: almost half-page cover height, not tiny contain
+          height: '92vh',
+          width: '100%',
+          objectFit: 'cover',
+          objectPosition: '62% center',
+          transform: 'scale(0.92) translateX(3%)',
+          transformOrigin: 'center right',
         }}
       />
     </div>
