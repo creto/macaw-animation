@@ -7,11 +7,13 @@ const SENSITIVITY = 0.8
 /** Seeks closer than this are not worth a round trip. */
 const SEEK_EPSILON = 0.01
 
+/**
+ * Compact macaw scrubber on the right. Page sky fills the rest.
+ * Scrub direction matches mouse: move left → earlier frames (head follows left).
+ */
 export default function BackgroundVideo() {
   const videoRef = useRef<HTMLVideoElement>(null)
-  /** Where we want the playhead to be; the mouse writes here, seeks chase it. */
   const targetTimeRef = useRef(0)
-  /** True while a seek is in flight, so we never flood the decoder. */
   const isSeekingRef = useRef(false)
   const prevXRef = useRef<number | null>(null)
 
@@ -23,7 +25,6 @@ export default function BackgroundVideo() {
     video.currentTime = targetTimeRef.current
   }, [])
 
-  // Once a seek lands, chase the target again if the mouse moved meanwhile.
   const handleSeeked = useCallback(() => {
     isSeekingRef.current = false
     seek()
@@ -48,7 +49,8 @@ export default function BackgroundVideo() {
       const delta = event.clientX - prevXRef.current
       prevXRef.current = event.clientX
 
-      const offset = (delta / window.innerWidth) * SENSITIVITY * duration
+      // Negate so left mouse motion scrubs toward the left-facing pose.
+      const offset = (-delta / window.innerWidth) * SENSITIVITY * duration
       targetTimeRef.current = Math.min(
         Math.max(targetTimeRef.current + offset, 0),
         duration,
@@ -62,19 +64,32 @@ export default function BackgroundVideo() {
   }, [seek])
 
   return (
-    <video
-      ref={videoRef}
-      src={VIDEO_SRC}
-      muted
-      playsInline
-      preload="auto"
-      onSeeked={handleSeeked}
-      className="fixed inset-0 h-full w-full"
+    <div
+      aria-hidden
+      className="pointer-events-none fixed z-0 overflow-hidden rounded-2xl shadow-sm"
       style={{
-        zIndex: 0,
-        objectFit: 'cover',
-        objectPosition: 'center center',
+        // Keep clear of left copy (max-w-xl + padding) and edges
+        right: 'clamp(1rem, 4vw, 3rem)',
+        top: '50%',
+        transform: 'translateY(-50%)',
+        width: 'min(38vw, 420px)',
+        aspectRatio: '16 / 9',
+        background: 'var(--macaw-sky)',
       }}
-    />
+    >
+      <video
+        ref={videoRef}
+        src={VIDEO_SRC}
+        muted
+        playsInline
+        preload="auto"
+        onSeeked={handleSeeked}
+        className="h-full w-full"
+        style={{
+          objectFit: 'contain',
+          objectPosition: 'center center',
+        }}
+      />
+    </div>
   )
 }
