@@ -4,9 +4,9 @@ const VIDEO_SRC = '/macaw.mp4'
 const SEEK_EPSILON = 0.02
 
 /**
- * Full-height macaw from mid-page to the right (original cover feel, right half only).
- * Absolute scrub: mouse X → playhead so the bird looks toward the cursor
- * (clip faces right at t=0, left at end → invert X).
+ * Full-height macaw from ~38% width to the right edge (a bit more than half).
+ * object-fit: contain so the bird is never cropped; nudged slightly right.
+ * Absolute scrub: mouse X → playhead (clip faces right at t=0, left at end).
  */
 export default function BackgroundVideo() {
   const videoRef = useRef<HTMLVideoElement>(null)
@@ -54,8 +54,9 @@ export default function BackgroundVideo() {
       aria-hidden
       className="pointer-events-none fixed inset-y-0 right-0 z-0 overflow-hidden"
       style={{
-        left: '50%',
-        width: '50%',
+        // A bit more than half: from 38% → right edge (~62% of viewport)
+        left: '38%',
+        width: '62%',
         background: 'var(--macaw-sky)',
       }}
     >
@@ -74,8 +75,10 @@ export default function BackgroundVideo() {
         }}
         className="h-full w-full"
         style={{
-          objectFit: 'cover',
-          objectPosition: 'center center',
+          // Full bird visible (no crop); slight bias to the right
+          objectFit: 'contain',
+          objectPosition: '70% center',
+          transform: 'translateX(4%)',
         }}
       />
     </div>
